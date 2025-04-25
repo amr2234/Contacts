@@ -1,0 +1,140 @@
+@using UsersContacts.Modules.Contacts.DTOs
+@model IEnumerable<ContactDto>
+@{
+    ViewData["Title"] = "Contacts";
+}
+
+<link rel="stylesheet" href="~/css/contact.css" />
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="text-primary fw-bold mb-0">Contacts</h2>
+        </div>
+        <div class="col text-end">
+            <button type="button" class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addContactModal">
+                <i class="bi bi-plus-circle me-1"></i> Add New Contact
+            </button>
+        </div>
+    </div>
+
+    <div class="data-container">
+        <div class="row mb-4">
+            <div class="col">
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control border-start-0" 
+                           placeholder="Search by name, phone, or address" value="@ViewBag.Search" />
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-danger d-none" id="inlineErrorAlert">
+            <span id="inlineErrorMessage"></span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover border-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Notes</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="contactsTableBody">
+                    @foreach (var contact in Model)
+                    {
+                        <tr data-contact-id="@contact.Id">
+                            <td class="editable" data-field="name">@contact.Name</td>
+                            <td class="editable" data-field="phone">@contact.Phone</td>
+                            <td class="editable" data-field="address">@contact.Address</td>
+                            <td class="editable" data-field="notes">@contact.Notes</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-danger delete-contact" data-id="@contact.Id">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="paginationContainer" class="mt-4">
+            <div class="pagination-info d-none" id="paginationInfo">
+                Showing <span id="startItem">1</span>-<span id="endItem">5</span> of <span id="totalItems">10</span> contacts
+            </div>
+            <div class="col">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center flex-wrap">
+                        <li class="page-item disabled" id="prevPageItem">
+                            <a class="page-link" href="javascript:void(0)" id="prevPage" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        @for (int i = 1; i <= Math.Ceiling((double)ViewBag.TotalCount / ViewBag.PageSize); i++)
+                        {
+                            <li class="page-item @(i == ViewBag.PageNumber ? "active" : "")">
+                                <a class="page-link" href="javascript:void(0)" data-page="@i">@i</a>
+                            </li>
+                        }
+                        <li class="page-item" id="nextPageItem">
+                            <a class="page-link" href="javascript:void(0)" id="nextPage" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addContactModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Contact</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addContactForm">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" />
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" id="phone" name="phone" maxlength="11" pattern="[0-9]*" inputmode="numeric" />
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="address" name="address" />
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes"></textarea>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveContact" disabled>Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const pageSize = @ViewBag.PageSize;
+        const pageNumber = @ViewBag.PageNumber;
+        const username = "@User.Identity?.Name";
+    </script>
+}
